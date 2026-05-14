@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visualización del Curso — SDI2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #0a0a0a;
+    color: #e2e0d8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem 1rem 3rem;
+    overflow-x: auto;
+  }
+
+  /* ── ROOT CHIP ── */
+  .root-chip {
+    background: var(--mg);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 9px 28px;
+    border-radius: 6px;
+    letter-spacing: 0.03em;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  /* ── CONNECTOR TEXT ── */
+  .connector-label {
+    font-size: 11px;
+    color: #444;
+    margin: 6px 0;
+    text-align: center;
+  }
+
+  /* ── COLUMNS LAYOUT ── */
+  .columns-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 1060px;
+  }
+
+  /* horizontal line connecting all column headers */
+  .h-line {
+    position: absolute;
+    top: 0;
+    left: calc(12.5%);
+    right: calc(12.5%);
+    height: 1px;
+    background: #2a2a2a;
+  }
+
+  .columns {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 12px;
+    width: 100%;
+  }
+
+  /* ── COLUMN ── */
+  .col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  /* vertical line from h-line down to header */
+  .col::before {
+    content: '';
+    width: 1px;
+    height: 18px;
+    background: #2a2a2a;
+    flex-shrink: 0;
+  }
+
+  /* ── UNIT HEADER ── */
+  .unit-header {
+    width: 100%;
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 8px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+    position: relative;
+    z-index: 2;
+  }
+  .u1 .unit-header { background: #2a1f4a; color: #9B8FFF; border: 0.5px solid #3d3480; }
+  .u2 .unit-header { background: #2a1f4a; color: #9B8FFF; border: 0.5px solid #3d3480; }
+  .u3 .unit-header { background: #2a1f4a; color: #9B8FFF; border: 0.5px solid #3d3480; }
+  .u4 .unit-header { background: #2a1f4a; color: #9B8FFF; border: 0.5px solid #3d3480; }
+
+  /* ── FLOW ITEMS ── */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    flex: 1;
+  }
+
+  .v-line {
+    width: 1px;
+    height: 14px;
+    background: #2a2a2a;
+    flex-shrink: 0;
+  }
+
+  .flow-label {
+    font-size: 10px;
+    color: #444;
+    text-align: center;
+    padding: 0 4px;
+  }
+
+  /* rounded-rect node */
+  .node {
+    width: 100%;
+    border-radius: 20px;
+    border: 0.5px solid #2e2e2e;
+    background: #141414;
+    padding: 9px 12px;
+    text-align: center;
+    font-size: 11px;
+    color: #aaa;
+    line-height: 1.45;
+  }
+  .node.highlight {
+    border-color: rgba(229,0,125,0.3);
+    background: rgba(229,0,125,0.07);
+    color: #ccc;
+  }
+
+  /* ── ACTIVITIES SECTION ── */
+  .act-section {
+    width: 100%;
+    margin-top: auto;
+  }
+
+  .act-label {
+    font-size: 10px;
+    color: #444;
+    text-align: left;
+    padding-left: 4px;
+    margin-bottom: 4px;
+  }
+
+  .act-divider {
+    width: 100%;
+    height: 0.5px;
+    background: #222;
+    margin-bottom: 8px;
+  }
+
+  .act-item {
+    width: 100%;
+    background: #111;
+    border: 0.5px solid #1e1e1e;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 10.5px;
+    color: #666;
+    text-align: center;
+    line-height: 1.4;
+    margin-bottom: 6px;
+  }
+
+  /* CSS variables */
+  :root {
+    --mg: #E5007D;
+    --purple: #8B5EA3;
+    --border: #1e1e1e;
+  }
+
+  /* top connector between root and columns */
+  .root-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1060px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ROOT -->
+<div class="root-chip">Seminario de Investigación II</div>
+
+<!-- connector down -->
+<div class="root-connector">
+  <div style="width:1px;height:12px;background:#2a2a2a;"></div>
+  <div style="font-size:10px;color:#444;margin-bottom:6px;">Contempla 4 unidades</div>
+
+  <!-- COLUMNS WRAP -->
+  <div class="columns-wrap">
+    <div class="h-line"></div>
+    <div class="columns">
+
+      <!-- ── UNIDAD 1 ── -->
+      <div class="col u1">
+        <div class="unit-header">Unidad 1: Problema de Investigación</div>
+        <div class="flow">
+          <div class="v-line"></div>
+          <div class="flow-label">Requiere</div>
+          <div class="v-line"></div>
+          <div class="node">
+            Identificar y delimitar una problemática real susceptible de ser abordada desde la Ciencia de Datos
+          </div>
+          <div class="v-line"></div>
+          <div class="flow-label">Para formular</div>
+          <div class="v-line"></div>
+          <div class="node highlight">
+            Un problema de investigación claro que fundamente la propuesta del curso
+          </div>
+          <div class="v-line" style="height:20px;"></div>
+          <div class="act-section">
+            <div class="act-divider"></div>
+            <div class="act-label">Actividad de aprendizaje</div>
+            <div class="act-item">Pregunta de Investigación</div>
+            <div class="act-item">Árbol de Problemas y Árbol de Objetivos</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── UNIDAD 2 ── -->
+      <div class="col u2">
+        <div class="unit-header">Unidad 2: Formulación de Objetivos</div>
+        <div class="flow">
+          <div class="v-line"></div>
+          <div class="flow-label">Requiere</div>
+          <div class="v-line"></div>
+          <div class="node">
+            Comprender la estructura y función de los objetivos dentro de una propuesta de investigación
+          </div>
+          <div class="v-line"></div>
+          <div class="flow-label">Para definir</div>
+          <div class="v-line"></div>
+          <div class="node highlight">
+            El alcance y la dirección del proyecto mediante objetivos coherentes con el problema identificado
+          </div>
+          <div class="v-line" style="height:20px;"></div>
+          <div class="act-section">
+            <div class="act-divider"></div>
+            <div class="act-label">Actividad de aprendizaje</div>
+            <div class="act-item">Describir: Planteamiento, Evidencias y Causas</div>
+            <div class="act-item">Definir Objetivos y Justificación</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── UNIDAD 3 ── -->
+      <div class="col u3">
+        <div class="unit-header">Unidad 3: Marco Referencial</div>
+        <div class="flow">
+          <div class="v-line"></div>
+          <div class="flow-label">Requiere</div>
+          <div class="v-line"></div>
+          <div class="node">
+            Buscar, seleccionar y organizar fuentes teóricas y contextuales relacionadas con la problemática y con Ciencia de Datos
+          </div>
+          <div class="v-line"></div>
+          <div class="flow-label">Para sustentar</div>
+          <div class="v-line"></div>
+          <div class="node highlight">
+            Académicamente la propuesta e identificar soluciones existentes que orienten el diseño del proyecto
+          </div>
+          <div class="v-line" style="height:20px;"></div>
+          <div class="act-section">
+            <div class="act-divider"></div>
+            <div class="act-label">Actividad de aprendizaje</div>
+            <div class="act-item">Método del Mapeo y Método por Índices</div>
+            <div class="act-item">Construir un Estado del Arte</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── UNIDAD 4 ── -->
+      <div class="col u4">
+        <div class="unit-header">Unidad 4: Diseño de Investigación</div>
+        <div class="flow">
+          <div class="v-line"></div>
+          <div class="flow-label">Requiere</div>
+          <div class="v-line"></div>
+          <div class="node">
+            Conocer enfoques, tipos de investigación y técnicas de recolección y análisis de datos en Ciencia de Datos
+          </div>
+          <div class="v-line"></div>
+          <div class="flow-label">Para construir</div>
+          <div class="v-line"></div>
+          <div class="node highlight">
+            Una ruta metodológica que permita desarrollar una propuesta de solución fundamentada y ejecutable
+          </div>
+          <div class="v-line" style="height:20px;"></div>
+          <div class="act-section">
+            <div class="act-divider"></div>
+            <div class="act-label">Actividad de aprendizaje</div>
+            <div class="act-item">Investigar metodologías en Ciencia de Datos</div>
+            <div class="act-item">Describir las fases de la metodología seleccionada</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /columns -->
+  </div><!-- /columns-wrap -->
+</div><!-- /root-connector -->
+
+</body>
+</html>

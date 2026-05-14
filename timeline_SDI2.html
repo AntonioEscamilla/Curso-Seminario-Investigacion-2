@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Línea de tiempo — Seminario de Investigación 2</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #0a0a0a;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2.5rem 1rem;
+  }
+  h1 {
+    font-size: 17px;
+    font-weight: 500;
+    color: #e2e0d8;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+  .subtitle {
+    font-size: 12px;
+    color: #555;
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  .legend {
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+  }
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: #666;
+  }
+  .leg-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    border: 2.5px solid;
+  }
+  .leg-dot.s { border-color: #8B7FE8; }
+  .leg-dot.e { border-color: #2E9E8A; }
+
+  .tl-container {
+    width: 100%;
+    max-width: 960px;
+    overflow-x: auto;
+    padding-bottom: 1rem;
+  }
+  .tl-outer {
+    min-width: 780px;
+    position: relative;
+  }
+
+  .top-row {
+    display: flex;
+    align-items: flex-end;
+    min-height: 160px;
+  }
+  .spine-row {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    position: relative;
+  }
+  .spine-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: #2a2a2a;
+    z-index: 0;
+  }
+  .bot-row {
+    display: flex;
+    align-items: flex-start;
+    min-height: 160px;
+  }
+
+  .col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .col.ghost { flex: 1; }
+
+  .dot-wrap {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+  .dot {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 2.5px solid;
+    background: #fff;
+    cursor: pointer;
+    transition: transform .15s;
+    z-index: 2;
+  }
+  .dot:hover { transform: scale(1.3); }
+  .dot.s { border-color: #534AB7; }
+  .dot.e { border-color: #0F6E56; }
+
+  .tick { width: 2px; }
+  .tick.s { background: #3d3480; }
+  .tick.e { background: #1e6e59; }
+  .tick-t { height: 20px; }
+  .tick-b { height: 20px; }
+
+  .dlabel {
+    font-size: 10px;
+    color: #555;
+    text-align: center;
+    line-height: 1.3;
+    padding: 4px 2px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .card {
+    width: 104px;
+    border-radius: 8px;
+    border: 1px solid;
+    padding: 8px 9px;
+    cursor: pointer;
+    transition: box-shadow .15s, transform .1s;
+  }
+  .card:hover {
+    box-shadow: 0 3px 10px rgba(0,0,0,.1);
+    transform: translateY(-1px);
+  }
+  .card.s { background: #1a1828; border-color: #3d3480; }
+  .card.e { background: #0e1f1c; border-color: #1e6e59; }
+  .ctag {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 4px;
+  }
+  .card.s .ctag { color: #9B8FFF; }
+  .card.e .ctag { color: #3ECAAA; }
+  .ctitle {
+    font-size: 11px;
+    font-weight: 500;
+    color: #ccc;
+    line-height: 1.3;
+  }
+
+  /* Modal */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.65);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .overlay.open { display: flex; }
+  .dbox {
+    background: #141414;
+    border-radius: 12px;
+    border: 1px solid #2a2a2a;
+    padding: 1.5rem;
+    max-width: 340px;
+    width: 90%;
+    position: relative;
+    animation: pop .18s ease;
+  }
+  @keyframes pop {
+    from { transform: scale(.94); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+  .dclose {
+    position: absolute;
+    top: 10px; right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 17px;
+    color: #555;
+    line-height: 1;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .dclose:hover { background: #1e1e1e; color: #aaa; }
+  .dtag {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 6px;
+  }
+  .dtag.s { color: #9B8FFF; }
+  .dtag.e { color: #3ECAAA; }
+  .dtitle {
+    font-size: 15px;
+    font-weight: 500;
+    color: #e2e0d8;
+    margin-bottom: 4px;
+    line-height: 1.35;
+  }
+  .ddate {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 12px;
+  }
+  .ddesc {
+    font-size: 13px;
+    color: #888;
+    line-height: 1.65;
+    border-top: 1px solid #222;
+    padding-top: 12px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Encuentros y Entregables - Línea de Tiempo</h1>
+<p class="subtitle">Haz clic en cualquier evento para ver los detalles</p>
+
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot e"></div>Entrega</div>
+  <div class="leg-item"><div class="leg-dot s"></div>Encuentro sincrónico</div>
+</div>
+
+<div class="tl-container">
+  <div class="tl-outer">
+    <div class="top-row" id="top-row"></div>
+    <div class="spine-row">
+      <div class="spine-line"></div>
+      <div id="dots-row" style="display:flex;width:100%;position:relative;z-index:2;"></div>
+    </div>
+    <div class="bot-row" id="bot-row"></div>
+  </div>
+</div>
+
+<div class="overlay" id="ov">
+  <div class="dbox">
+    <button class="dclose" id="dclose">✕</button>
+    <div class="dtag" id="dtag"></div>
+    <div class="dtitle" id="dtitle"></div>
+    <div class="ddate" id="ddate"></div>
+    <div class="ddesc" id="ddesc"></div>
+  </div>
+</div>
+
+<script>
+var evts = [
+  {
+    t: 's',
+    tag: 'Encuentro sincrónico 1',
+    title: 'Dinámica del curso y contexto inicial',
+    dl: '14 mayo',
+    date: 'Jueves 14 de mayo · 6:00 – 8:00 p.m.',
+    desc: 'Presentación general de la dinámica del curso: entregas, fechas de encuentros y expectativas del semestre. Como actividad de contextualización, se revisarán los avances iniciales en la exploración del marco conceptual. Se recomienda tener a la mano los trabajos explorados previamente.'
+  },
+  {
+    t: 'e',
+    tag: 'Entrega 1',
+    title: 'Árbol de problemas y objetivos',
+    dl: '23 mayo',
+    date: 'Sábado 23 de mayo',
+    desc: 'Elaboración del árbol de problemas identificando el problema central, sus causas y efectos, y construcción del árbol de objetivos transformando cada elemento en su situación positiva correspondiente. Ambos árboles deben estar alineados con el planteamiento del problema y la hipótesis trabajados en las actividades anteriores.'
+  },
+  {
+    t: 'e',
+    tag: 'Entrega 2',
+    title: 'Sección del problema de investigación',
+    dl: '30 mayo',
+    date: 'Sábado 30 de mayo',
+    desc: 'Documento con el planteamiento del estado negativo existente, las evidencias documentadas que lo respaldan y las causas que lo originan. Se incluyen como anexo el árbol de problemas y el árbol de objetivos. Todas las afirmaciones deben estar debidamente citadas en normas APA.'
+  },
+  {
+    t: 'e',
+    tag: 'Entrega 3',
+    title: 'Objetivos, justificación y título',
+    dl: '6 jun',
+    date: 'Sábado 6 de junio',
+    desc: 'Documento con el título del proyecto, el objetivo general con verbo en infinitivo medible, los objetivos específicos en orden cronológico y la justificación argumentada con respaldo bibliográfico. Este entregable es la continuación directa de la Entrega 2.'
+  },
+  {
+    t: 's',
+    tag: 'Encuentro sincrónico 2',
+    title: 'Retroalimentación y resolución de dudas',
+    dl: '11 jun',
+    date: 'Jueves 11 de junio · 6:00 – 8:00 p.m.',
+    desc: 'Sesión de feedback y revisión de las entregas anteriores: planteamiento del problema y objetivos. Se resolverán dudas frecuentes sobre la diferencia entre el estado del arte y el marco conceptual, y se dará orientación para avanzar en la Entrega 4.'
+  },
+  {
+    t: 'e',
+    tag: 'Entrega 4',
+    title: 'Marco conceptual y estado del arte',
+    dl: '13 jun',
+    date: 'Sábado 13 de junio',
+    desc: 'Marco conceptual organizado de lo general a lo particular, con secciones y subsecciones según el índice construido, y estado del arte con las investigaciones previas más relevantes. En ambas secciones todas las afirmaciones deben estar citadas. Se incluye la lista completa de referencias bibliográficas.'
+  },
+  {
+    t: 's',
+    tag: 'Encuentro sincrónico 3a',
+    title: 'Revisión de propuestas · sesión 1',
+    dl: '17 jun',
+    date: 'Miércoles 17 de junio · 6:00 – 8:00 p.m.',
+    desc: 'Espacio de revisión personalizada donde cada estudiante presenta la metodología seleccionada para su proyecto, la justificación de su elección y la manera en que cada fase metodológica se articula con sus objetivos específicos.'
+  },
+  {
+    t: 's',
+    tag: 'Encuentro sincrónico 3b',
+    title: 'Revisión de propuestas · sesión 2',
+    dl: '18 jun',
+    date: 'Jueves 18 de junio · 6:00 – 8:00 p.m.',
+    desc: 'Continuación del espacio de revisión personalizada. Cada estudiante presenta la metodología seleccionada, su justificación y la articulación de cada fase con los objetivos específicos del proyecto. El docente y los compañeros ofrecen retroalimentación antes del cierre del curso.'
+  },
+  {
+    t: 'e',
+    tag: 'Entrega 5',
+    title: 'Anteproyecto completo',
+    dl: '25 jun',
+    date: 'Jueves 25 de junio',
+    desc: 'Entrega final del curso: anteproyecto completo en el formato oficial de la Maestría en Ciencia de Datos de la UPB, con todas las secciones diligenciadas, sin textos de orientación sin reemplazar, y con un mínimo de 30 referencias bibliográficas en formato APA.'
+  }
+];
+
+function openModal(i) {
+  var ev = evts[i];
+  document.getElementById('dtag').textContent = ev.tag;
+  document.getElementById('dtag').className = 'dtag ' + ev.t;
+  document.getElementById('dtitle').textContent = ev.title;
+  document.getElementById('ddate').textContent = ev.date;
+  document.getElementById('ddesc').textContent = ev.desc;
+  document.getElementById('ov').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('ov').classList.remove('open');
+}
+document.getElementById('dclose').onclick = closeModal;
+document.getElementById('ov').onclick = function(e) { if (e.target === this) closeModal(); };
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+
+var topRow = document.getElementById('top-row');
+var botRow = document.getElementById('bot-row');
+var dotsRow = document.getElementById('dots-row');
+
+evts.forEach(function(ev, i) {
+  var topCol = document.createElement('div');
+  var botCol = document.createElement('div');
+  var dotWrap = document.createElement('div');
+
+  dotWrap.style.flex = '1';
+  dotWrap.style.display = 'flex';
+  dotWrap.style.justifyContent = 'center';
+  var dot = document.createElement('div');
+  dot.className = 'dot ' + ev.t;
+  dot.title = ev.title;
+  dot.onclick = (function(idx){ return function(){ openModal(idx); }; })(i);
+  dotWrap.appendChild(dot);
+  dotsRow.appendChild(dotWrap);
+
+  if (ev.t === 'e') {
+    topCol.className = 'col';
+    topCol.innerHTML =
+      '<div class="card ' + ev.t + '" onclick="openModal(' + i + ')">' +
+        '<div class="ctag">' + ev.tag + '</div>' +
+        '<div class="ctitle">' + ev.title + '</div>' +
+      '</div>' +
+      '<div class="dlabel">' + ev.dl + '</div>' +
+      '<div class="tick tick-t ' + ev.t + '"></div>';
+    botCol.className = 'col ghost';
+  } else {
+    topCol.className = 'col ghost';
+    botCol.className = 'col';
+    botCol.innerHTML =
+      '<div class="tick tick-b ' + ev.t + '"></div>' +
+      '<div class="dlabel">' + ev.dl + '</div>' +
+      '<div class="card ' + ev.t + '" onclick="openModal(' + i + ')">' +
+        '<div class="ctag">' + ev.tag + '</div>' +
+        '<div class="ctitle">' + ev.title + '</div>' +
+      '</div>';
+  }
+
+  topRow.appendChild(topCol);
+  botRow.appendChild(botCol);
+});
+</script>
+</body>
+</html>

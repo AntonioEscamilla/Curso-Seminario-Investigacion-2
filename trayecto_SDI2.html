@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trayecto de Actividades — Seminario de Investigación II</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #0d0d0d;
+    color: #e2e0d8;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 680px;
+  }
+
+  /* TOP BAR */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .top-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #f0efe8;
+  }
+  .expand-btn {
+    font-size: 12px;
+    color: #888;
+    background: none;
+    border: 0.5px solid #333;
+    border-radius: 8px;
+    padding: 5px 13px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .expand-btn:hover { background: #1e1e1e; color: #ccc; }
+
+  /* SUMMARY CHIPS */
+  .summary-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 0.5px solid #222;
+  }
+  .chip {
+    font-size: 11px;
+    padding: 4px 11px;
+    border-radius: 20px;
+    border: 0.5px solid #2e2e2e;
+    color: #888;
+    background: #161616;
+  }
+  .chip span { font-weight: 500; color: #ccc; }
+
+  /* UNIT */
+  .unit-block { margin-bottom: 1.2rem; }
+
+  .unit-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    border: 0.5px solid transparent;
+    transition: opacity 0.15s;
+  }
+  .unit-header:hover { opacity: 0.88; }
+
+  .unit-icon {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 14px;
+  }
+  .unit-meta { flex: 1; }
+  .unit-label { font-size: 10px; font-weight: 500; opacity: 0.65; margin-bottom: 2px; }
+  .unit-title { font-size: 14px; font-weight: 600; }
+  .unit-pct { font-size: 12px; font-weight: 500; opacity: 0.75; margin-right: 4px; }
+  .chevron { font-size: 16px; color: #666; transition: transform 0.25s; line-height: 1; }
+  .unit-header.open .chevron { transform: rotate(90deg); }
+
+  /* UNIT CHILDREN */
+  .unit-children {
+    display: none;
+    padding-left: 24px;
+    border-left: 2px solid;
+    margin-left: 22px;
+    margin-top: 6px;
+  }
+  .unit-children.open { display: flex; flex-direction: column; gap: 0; }
+
+  /* ACTIVITY */
+  .act-row { position: relative; }
+  .act-row::before {
+    content: '';
+    position: absolute;
+    left: -24px; top: 21px;
+    width: 16px; height: 0;
+    border-top: 2px solid;
+    opacity: 0.35;
+  }
+
+  .act-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 0.5px solid #2a2a2a;
+    background: #141414;
+    margin-bottom: 4px;
+    transition: background 0.15s;
+  }
+  .act-header:hover { background: #1c1c1c; }
+  .act-num {
+    font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .act-title { font-size: 13px; font-weight: 500; flex: 1; color: #dddbd2; }
+  .act-pct {
+    font-size: 10px; font-weight: 600;
+    padding: 2px 7px; border-radius: 20px;
+    flex-shrink: 0;
+  }
+  .act-chevron { font-size: 13px; color: #555; transition: transform 0.25s; }
+  .act-header.open .act-chevron { transform: rotate(90deg); }
+
+  /* ACTION CHILDREN */
+  .act-children {
+    display: none;
+    padding-left: 20px;
+    border-left: 1.5px dashed #2e2e2e;
+    margin-left: 18px;
+    margin-bottom: 8px;
+    gap: 3px;
+  }
+  .act-children.open { display: flex; flex-direction: column; }
+
+  .action-row { position: relative; }
+  .action-row::before {
+    content: '';
+    position: absolute;
+    left: -20px; top: 14px;
+    width: 14px; height: 0;
+    border-top: 1.5px dashed #2e2e2e;
+  }
+
+  .action-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #111;
+    border: 0.5px solid #222;
+  }
+  .action-icon-wrap {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    font-size: 13px;
+  }
+  .action-content { flex: 1; }
+  .action-title { font-size: 12px; font-weight: 500; color: #d8d6ce; margin-bottom: 2px; }
+  .action-desc { font-size: 11px; color: #666; line-height: 1.5; }
+  .deliverable-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  /* ========================= UNIT COLORS ========================= */
+
+  /* U1 — magenta */
+  .u1 .unit-header { background: rgba(229,0,125,0.1); border-color: rgba(229,0,125,0.25); }
+  .u1 .unit-icon { background: rgba(229,0,125,0.18); color: #ff5fb0; }
+  .u1 .unit-title { color: #ff5fb0; }
+  .u1 .unit-children { border-color: #E5007D; }
+  .u1 .act-row::before { border-color: #E5007D; }
+  .u1 .act-num { background: rgba(229,0,125,0.15); color: #ff5fb0; }
+  .u1 .act-pct { background: rgba(229,0,125,0.15); color: #ff5fb0; }
+  .u1 .deliverable-tag { background: rgba(229,0,125,0.12); color: #ff5fb0; }
+
+  /* U2 — purple */
+  .u2 .unit-header { background: rgba(139,94,163,0.1); border-color: rgba(139,94,163,0.25); }
+  .u2 .unit-icon { background: rgba(139,94,163,0.18); color: #c49ad8; }
+  .u2 .unit-title { color: #c49ad8; }
+  .u2 .unit-children { border-color: #8B5EA3; }
+  .u2 .act-row::before { border-color: #8B5EA3; }
+  .u2 .act-num { background: rgba(139,94,163,0.15); color: #c49ad8; }
+  .u2 .act-pct { background: rgba(139,94,163,0.15); color: #c49ad8; }
+  .u2 .deliverable-tag { background: rgba(139,94,163,0.12); color: #c49ad8; }
+
+  /* U3 — teal */
+  .u3 .unit-header { background: rgba(46,125,123,0.1); border-color: rgba(46,125,123,0.25); }
+  .u3 .unit-icon { background: rgba(46,125,123,0.18); color: #5fbdb8; }
+  .u3 .unit-title { color: #5fbdb8; }
+  .u3 .unit-children { border-color: #2E7D7B; }
+  .u3 .act-row::before { border-color: #2E7D7B; }
+  .u3 .act-num { background: rgba(46,125,123,0.15); color: #5fbdb8; }
+  .u3 .act-pct { background: rgba(46,125,123,0.15); color: #5fbdb8; }
+  .u3 .deliverable-tag { background: rgba(46,125,123,0.12); color: #5fbdb8; }
+
+  /* U4 — blue-grey */
+  .u4 .unit-header { background: rgba(105,151,175,0.1); border-color: rgba(105,151,175,0.25); }
+  .u4 .unit-icon { background: rgba(105,151,175,0.18); color: #96c4d9; }
+  .u4 .unit-title { color: #96c4d9; }
+  .u4 .unit-children { border-color: #6997AF; }
+  .u4 .act-row::before { border-color: #6997AF; }
+  .u4 .act-num { background: rgba(105,151,175,0.15); color: #96c4d9; }
+  .u4 .act-pct { background: rgba(105,151,175,0.15); color: #96c4d9; }
+  .u4 .deliverable-tag { background: rgba(105,151,175,0.12); color: #96c4d9; }
+
+  /* action icon wrap colors per unit */
+  .u1 .action-icon-wrap { background: rgba(229,0,125,0.1); color: #ff5fb0; }
+  .u2 .action-icon-wrap { background: rgba(139,94,163,0.1); color: #c49ad8; }
+  .u3 .action-icon-wrap { background: rgba(46,125,123,0.1); color: #5fbdb8; }
+  .u4 .action-icon-wrap { background: rgba(105,151,175,0.1); color: #96c4d9; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: #111; }
+  ::-webkit-scrollbar-thumb { background: #2e2e2e; border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="top-bar">
+    <span class="top-title">Trayecto de Actividades</span>
+    <button class="expand-btn" id="expand-btn" onclick="toggleAll()">Expandir todo</button>
+  </div>
+
+  <div class="summary-bar">
+    <div class="chip"><span>4</span> unidades</div>
+    <div class="chip"><span>8</span> actividades</div>
+    <div class="chip"><span>2</span> créditos · <span>96</span> h totales</div>
+    <div class="chip"><span>4</span> semanas</div>
+    <div class="chip">Modalidad <span>virtual</span></div>
+  </div>
+
+  <div id="tree"></div>
+
+</div>
+
+<script>
+const DATA = [
+  {
+    id:'u1', label:'Unidad 1', title:'Problema de Investigación', icon:'&#128269;', pct:'20%',
+    activities:[
+      { num:'A1', title:'La Pregunta de Investigación', pct:'5%',
+        actions:[
+          { icon:'&#128218;', title:'Recurso interactivo', desc:'La pregunta de investigación — lectura y profundización (U1_A1.1)' },
+          { icon:'&#128172;', title:'Foro de participación', desc:'Formulación de la pregunta de investigación + comentarios a ≥2 compañeros', deliverable:'Participación en foro · 5%' }
+        ]
+      },
+      { num:'A2', title:'Del Problema a la Hipótesis', pct:'5%',
+        actions:[
+          { icon:'&#128218;', title:'El planteamiento del problema', desc:'Criterios cuantitativos, hipótesis verificable y falsable (U1_A2.1)' },
+          { icon:'&#9745;', title:'Evaluación de tesis UPB', desc:'Evaluación de la sección "Planteamiento del problema" en dos trabajos del repositorio (U1_A2.3)' },
+          { icon:'&#128172;', title:'Foro: Del problema a la hipótesis', desc:'Planteamiento estructurado + hipótesis desde la Ciencia de Datos', deliverable:'Participación en foro · 5%' }
+        ]
+      },
+      { num:'A3', title:'Árbol de Problemas y Objetivos', pct:'10%',
+        actions:[
+          { icon:'&#128218;', title:'El árbol de problemas', desc:'Cinco momentos de construcción con ejemplo aplicado (U1_A3.1)' },
+          { icon:'&#128218;', title:'El árbol de objetivos', desc:'Transformación de causas/efectos negativos en medios/fines (U1_A3.2)' },
+          { icon:'&#128228;', title:'Buzón de entrega', desc:'Árbol de problemas + árbol de objetivos en PDF', deliverable:'Entrega en PDF · 10%' }
+        ]
+      }
+    ]
+  },
+  {
+    id:'u2', label:'Unidad 2', title:'Formulación de Objetivos', icon:'&#127919;', pct:'30%',
+    activities:[
+      { num:'A1', title:'Objetivo General y Específicos', pct:'10%',
+        actions:[
+          { icon:'&#128218;', title:'Cómo redactar objetivos', desc:'Criterios SMART, taxonomía de verbos y errores frecuentes (U2_A1.1)' },
+          { icon:'&#9745;', title:'Evaluación de objetivos en tesis UPB', desc:'Evaluación crítica de objetivos usando el repositorio (U2_A2.2)' },
+          { icon:'&#127909;', title:'Encuentro sincrónico', desc:'Dudas, avances y retroalimentación antes de los entregables' },
+          { icon:'&#128228;', title:'Buzón: Problema de investigación', desc:'Planteamiento (situación negativa, evidencias, causas) + árboles como anexo', deliverable:'Entrega en PDF · 10%' }
+        ]
+      },
+      { num:'A2', title:'La Justificación del Problema', pct:'20%',
+        actions:[
+          { icon:'&#128218;', title:'La justificación', desc:'5 criterios de Hernández-Sampieri: conveniencia, relevancia social, implicaciones prácticas, valor teórico y utilidad metodológica (U2_A2.1)' },
+          { icon:'&#128228;', title:'Buzón: Objetivos y Justificación', desc:'Título, objetivo general, objetivos específicos y justificación integrados', deliverable:'Entrega en PDF · 20%' }
+        ]
+      }
+    ]
+  },
+  {
+    id:'u3', label:'Unidad 3', title:'Marco Referencial', icon:'&#128218;', pct:'25%',
+    activities:[
+      { num:'A1', title:'Perspectiva Teórica', pct:'5%',
+        actions:[
+          { icon:'&#128218;', title:'Desarrollo de la perspectiva teórica', desc:'Pirámide del conocimiento, método de mapeo y método por índices (U3_A1.1)' },
+          { icon:'&#128218;', title:'El estado del arte', desc:'Búsqueda, evaluación y redacción integrada con vacíos del conocimiento (U3_A1.2)' },
+          { icon:'&#128218;', title:'Cómo construir un marco conceptual', desc:'Organización de lo general a lo particular — UC Chile (Vidal, 2019)' },
+          { icon:'&#128172;', title:'Foro: Primera aproximación al marco conceptual', desc:'Índice tentativo del marco conceptual con retroalimentación de pares', deliverable:'Participación en foro · 5%' },
+          { icon:'&#127909;', title:'Encuentro sincrónico', desc:'Revisión del marco referencial y coherencia con objetivos y problema' }
+        ]
+      },
+      { num:'A2', title:'Uso de Citas en la Investigación', pct:'20%',
+        actions:[
+          { icon:'&#128218;', title:'Uso de citas', desc:'Cita textual, parafraseada, narrativa y parentética + matriz de decisión rápida (U3_A2.1)' },
+          { icon:'&#128228;', title:'Buzón: Marco Conceptual y Estado del Arte', desc:'Marco conceptual (de lo general a lo particular) + estado del arte + referencias APA completas', deliverable:'Entrega en PDF · 20%' }
+        ]
+      }
+    ]
+  },
+  {
+    id:'u4', label:'Unidad 4', title:'Alcances y Metodología', icon:'&#128506;', pct:'25%',
+    activities:[
+      { num:'A1', title:'Alcances y Metodología de la Investigación', pct:'5%',
+        actions:[
+          { icon:'&#128218;', title:'Alcances de la investigación', desc:'Exploratorio, descriptivo, correlacional y explicativo — tabla comparativa y matriz de decisión (U4_A1.1)' },
+          { icon:'&#128218;', title:'Metodología de la investigación', desc:'CRISP-DM, TDSP, SEMMA y KDD — fases y alineación con objetivos (U4_A1.2)' },
+          { icon:'&#128172;', title:'Foro: Alcance de mi proyecto', desc:'Definición y justificación del alcance con retroalimentación de pares', deliverable:'Participación en foro · 5%' },
+          { icon:'&#127909;', title:'Encuentro sincrónico', desc:'Presentación individual del diseño metodológico con retroalimentación del docente' }
+        ]
+      },
+      { num:'A2', title:'Otras Dimensiones en el Anteproyecto', pct:'20%',
+        actions:[
+          { icon:'&#128218;', title:'Otras dimensiones del anteproyecto', desc:'Cronograma, presupuesto, propiedad intelectual y concepto ético (U4_A2.1)' },
+          { icon:'&#128228;', title:'Buzón: Anteproyecto completo', desc:'Versión final con todas las secciones — problema, objetivos, justificación, marco referencial, metodología, cronograma, presupuesto, ética y ≥30 referencias APA', deliverable:'Entrega en PDF · 20%' }
+        ]
+      }
+    ]
+  }
+];
+
+function build() {
+  const tree = document.getElementById('tree');
+  DATA.forEach(unit => {
+    const ub = document.createElement('div');
+    ub.className = `unit-block ${unit.id}`;
+
+    const uh = document.createElement('div');
+    uh.className = 'unit-header';
+    uh.innerHTML = `
+      <div class="unit-icon">${unit.icon}</div>
+      <div class="unit-meta">
+        <div class="unit-label">${unit.label}</div>
+        <div class="unit-title">${unit.title}</div>
+      </div>
+      <span class="unit-pct">${unit.pct}</span>
+      <span class="chevron">›</span>`;
+
+    const uc = document.createElement('div');
+    uc.className = 'unit-children';
+
+    uh.onclick = () => {
+      const open = uc.classList.toggle('open');
+      uh.classList.toggle('open', open);
+    };
+
+    unit.activities.forEach(act => {
+      const ar = document.createElement('div');
+      ar.className = 'act-row';
+
+      const ah = document.createElement('div');
+      ah.className = 'act-header';
+      ah.innerHTML = `
+        <span class="act-num">${act.num}</span>
+        <span class="act-title">${act.title}</span>
+        <span class="act-pct">${act.pct}</span>
+        <span class="act-chevron">›</span>`;
+
+      const ac = document.createElement('div');
+      ac.className = 'act-children';
+
+      ah.onclick = () => {
+        const open = ac.classList.toggle('open');
+        ah.classList.toggle('open', open);
+      };
+
+      act.actions.forEach(action => {
+        const row = document.createElement('div');
+        row.className = 'action-row';
+        const item = document.createElement('div');
+        item.className = 'action-item';
+        item.innerHTML = `
+          <div class="action-icon-wrap">${action.icon}</div>
+          <div class="action-content">
+            <div class="action-title">${action.title}</div>
+            <div class="action-desc">${action.desc}</div>
+            ${action.deliverable ? `<span class="deliverable-tag">&#127942; ${action.deliverable}</span>` : ''}
+          </div>`;
+        row.appendChild(item);
+        ac.appendChild(row);
+      });
+
+      ar.appendChild(ah);
+      ar.appendChild(ac);
+      uc.appendChild(ar);
+    });
+
+    ub.appendChild(uh);
+    ub.appendChild(uc);
+    tree.appendChild(ub);
+  });
+}
+
+let allOpen = false;
+function toggleAll() {
+  allOpen = !allOpen;
+  document.getElementById('expand-btn').textContent = allOpen ? 'Colapsar todo' : 'Expandir todo';
+  document.querySelectorAll('.unit-children').forEach(el => el.classList.toggle('open', allOpen));
+  document.querySelectorAll('.unit-header').forEach(el => el.classList.toggle('open', allOpen));
+  document.querySelectorAll('.act-children').forEach(el => el.classList.toggle('open', allOpen));
+  document.querySelectorAll('.act-header').forEach(el => el.classList.toggle('open', allOpen));
+}
+
+build();
+</script>
+</body>
+</html>

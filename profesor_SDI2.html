@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acerca del Profesor</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: #0a0a0a;
+    color: #e2e0d8;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2.5rem 1.5rem 3rem;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 800px;
+    background: #111;
+    border: 0.5px solid #1e1e1e;
+    border-radius: 16px;
+    padding: 2rem 2.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2rem;
+  }
+
+  /* LEFT COLUMN */
+  .left { display: flex; flex-direction: column; gap: 1.6rem; }
+
+  .section-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #444;
+    margin-bottom: 0.6rem;
+  }
+
+  /* NAME */
+  .name {
+    font-size: 22px;
+    font-weight: 700;
+    color: #f0efe8;
+    line-height: 1.2;
+    margin-bottom: 0.1rem;
+  }
+
+  /* BULLET LIST */
+  .bullet-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 0;
+    list-style: none;
+  }
+  .bullet-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    font-size: 12.5px;
+    color: #999;
+    line-height: 1.5;
+  }
+  .bullet-list li::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border: 1.5px solid #E5007D;
+    border-radius: 1px;
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+
+  /* BLOCK LABEL */
+  .block { display: flex; flex-direction: column; }
+
+  .block-heading {
+    font-size: 13px;
+    font-weight: 600;
+    color: #E5007D;
+    margin-bottom: 0.5rem;
+  }
+
+  .block-text {
+    font-size: 12.5px;
+    color: #888;
+    line-height: 1.6;
+  }
+
+  /* CONTACT */
+  .contact-block {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .contact-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: #666;
+  }
+  .contact-row a {
+    color: #888;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+  .contact-row a:hover { color: #E5007D; }
+  .contact-icon {
+    font-size: 13px;
+    width: 16px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  /* RIGHT COLUMN — photo */
+  .right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 0.25rem;
+  }
+
+  .photo-wrap {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    border: 2px solid #E5007D;
+    box-shadow: 0 0 20px rgba(229,0,125,0.25);
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #1a1a1a;
+  }
+  .photo-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    filter: grayscale(15%);
+  }
+
+  .email-chip {
+    font-size: 11px;
+    font-weight: 600;
+    color: #E5007D;
+    background: rgba(229,0,125,0.1);
+    border: 0.5px solid rgba(229,0,125,0.28);
+    border-radius: 20px;
+    padding: 5px 12px;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  /* DIVIDER */
+  .divider {
+    height: 0.5px;
+    background: #1e1e1e;
+    width: 100%;
+  }
+
+  /* TAGS */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .tag {
+    font-size: 11px;
+    padding: 4px 11px;
+    border-radius: 20px;
+    border: 0.5px solid #2e2e2e;
+    color: #666;
+    background: #161616;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- LEFT -->
+  <div class="left">
+
+    <div class="block">
+      <div class="section-title">Docente</div>
+      <div class="name">Antonio Escamilla P.</div>
+    </div>
+
+    <div class="block">
+      <div class="block-heading">Formación académica</div>
+      <ul class="bullet-list">
+        <li>PhD. Information Technologies · Universitat Oberta de Catalunya, 2023</li>
+        <li>MSc. Sound &amp; Music Computing · Universitat Pompeu Fabra, 2010</li>
+        <li>Ing. de Sonido · Universidad de San Buenaventura, 2008</li>
+        <li>Ing. Electrónico · Universidad Pontificia Bolivariana, 2005</li>
+      </ul>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="block">
+      <div class="block-heading">Cargo</div>
+      <div class="block-text">
+        Profesor Asociado<br>
+        Facultad de Ingeniería en Tecnologías de la Información y la Comunicación
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block-heading">Áreas de interés</div>
+      <div class="tags">
+        <span class="tag">Human-Computer Interaction</span>
+        <span class="tag">Machine &amp; Deep Learning</span>
+        <span class="tag">Music Information Retrieval</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="contact-block">
+      <div class="section-title">Contacto y recursos</div>
+      <div class="contact-row">
+        <span class="contact-icon">✉</span>
+        <a href="mailto:antonio.escamilla@upb.edu.co">antonio.escamilla@upb.edu.co</a>
+      </div>
+      <div class="contact-row">
+        <span class="contact-icon">⌥</span>
+        <a href="https://github.com/AntonioEscamilla" target="_blank">github.com/AntonioEscamilla</a>
+      </div>
+      <div class="contact-row">
+        <span class="contact-icon">◈</span>
+        <a href="https://antonioescamilla.github.io/" target="_blank">antonioescamilla.github.io</a>
+      </div>
+      <div class="contact-row">
+        <span class="contact-icon">◎</span>
+        <span>Bloque 11-317 · Ecocampus Laureles</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="photo-wrap">
+      <!--
+        Reemplaza el src con la ruta real de la foto del profesor.
+        Ejemplo: src="foto_profesor.png"
+        La imagen debe estar en la misma carpeta que este archivo.
+      -->
+      <img src="AEscamilla_small_photo.jpg" alt="Antonio Escamilla">
+    </div>
+    <div class="email-chip">UPB · MCD</div>
+  </div>
+
+</div>
+</body>
+</html>

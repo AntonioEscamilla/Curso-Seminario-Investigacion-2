@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seminario de Investigación II</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --bg:        #0a0a0a;
+    --surface:   #111111;
+    --border:    #1e1e1e;
+    --text:      #e2e0d8;
+    --muted:     #555;
+    --magenta:   #E5007D;
+    --magenta-lo: rgba(229,0,125,0.12);
+    --magenta-md: rgba(229,0,125,0.28);
+    --purple:    #8B5EA3;
+    --purple-lo: rgba(139,94,163,0.12);
+    --cyan:      #6997AF;
+    --cyan-lo:   rgba(105,151,175,0.12);
+    --teal:      #2E7D7B;
+    --teal-lo:   rgba(46,125,123,0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  /* ── LAYOUT SHELL ── */
+  .shell {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    flex-shrink: 0;
+    background: var(--bg);
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .header-img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: none;   /* nunca reducir */
+    flex-shrink: 0;
+  }
+
+  /* gradient overlay so bottom of image blends into body */
+  .header-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(10,10,10,0.15) 0%,
+      rgba(10,10,10,0.0) 40%,
+      rgba(10,10,10,0.75) 80%,
+      rgba(10,10,10,1.0) 100%
+    );
+  }
+
+  /* subtle magenta vignette on left */
+  .header-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 0% 50%, rgba(229,0,125,0.18) 0%, transparent 60%);
+  }
+
+  .header-badge {
+    position: absolute;
+    bottom: 14px;
+    right: 18px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--magenta);
+    text-transform: uppercase;
+    background: rgba(10,10,10,0.7);
+    border: 0.5px solid var(--magenta-md);
+    border-radius: 20px;
+    padding: 5px 12px;
+    backdrop-filter: blur(8px);
+  }
+  .header-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--magenta);
+    box-shadow: 0 0 6px var(--magenta);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ── NAV BAR ── */
+  .nav-bar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-bottom: 0.5px solid var(--border);
+    background: var(--surface);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-bar::-webkit-scrollbar { display: none; }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin-right: 4px;
+  }
+
+  .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .nav-btn:hover {
+    border-color: #333;
+    color: var(--text);
+    background: #161616;
+  }
+  .nav-btn.active {
+    color: #fff;
+    border-color: transparent;
+    background: var(--magenta);
+    box-shadow: 0 0 16px rgba(229,0,125,0.35);
+  }
+
+  /* widget-specific active colors */
+  .nav-btn[data-idx="1"].active { background: var(--purple); box-shadow: 0 0 16px rgba(139,94,163,0.4); }
+  .nav-btn[data-idx="2"].active { background: var(--teal);   box-shadow: 0 0 16px rgba(46,125,123,0.4); }
+  .nav-btn[data-idx="3"].active { background: var(--cyan);   box-shadow: 0 0 16px rgba(105,151,175,0.4); }
+
+  .nav-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: currentColor;
+    opacity: 0.7;
+  }
+
+  /* ── IFRAME CONTAINER ── */
+  .widget-area {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .widget-frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .widget-frame.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* placeholder for widgets 2 & 3 (no file yet) */
+  .placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .placeholder.active { opacity: 1; pointer-events: all; }
+
+  .placeholder-icon {
+    font-size: 40px;
+    opacity: 0.3;
+  }
+  .placeholder-text {
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.6;
+  }
+  .placeholder-chip {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 0.5px dashed #2e2e2e;
+    color: #444;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── FOOTER NAV ── */
+  footer {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-top: 0.5px solid var(--border);
+    background: var(--surface);
+  }
+
+  .footer-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .footer-counter {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .footer-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: #888;
+  }
+
+  .nav-arrows {
+    display: flex;
+    gap: 6px;
+  }
+  .arrow-btn {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 0.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1;
+  }
+  .arrow-btn:hover:not(:disabled) {
+    background: #1a1a1a;
+    border-color: #333;
+    color: var(--text);
+  }
+  .arrow-btn:disabled {
+    opacity: 0.25;
+    cursor: default;
+  }
+
+  /* progress pip track */
+  .pip-track {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+  .pip {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: all 0.25s;
+    cursor: pointer;
+  }
+  .pip.active {
+    background: var(--magenta);
+    box-shadow: 0 0 6px var(--magenta);
+    width: 20px;
+    border-radius: 3px;
+  }
+  .pip[data-idx="1"].active { background: var(--purple); box-shadow: 0 0 6px var(--purple); }
+  .pip[data-idx="2"].active { background: var(--teal);   box-shadow: 0 0 6px var(--teal); }
+  .pip[data-idx="3"].active { background: var(--cyan);   box-shadow: 0 0 6px var(--cyan); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- HEADER -->
+  <header>
+    <img
+      class="header-img"
+      src="header.png"
+      alt="Seminario de Investigación II"
+      onerror="this.style.background='linear-gradient(135deg,#0d0d0d 0%,#1a0a12 50%,#0a0d1a 100%)'; this.removeAttribute('src');"
+    >
+    <div class="header-overlay"></div>
+    <div class="header-vignette"></div>
+    <div class="header-badge">Seminario de Investigación II</div>
+  </header>
+
+  <!-- TOP NAV TABS -->
+  <nav class="nav-bar" id="nav-bar">
+    <span class="nav-label">Módulo</span>
+    <!-- buttons injected by JS -->
+  </nav>
+
+  <!-- WIDGET AREA -->
+  <div class="widget-area" id="widget-area">
+    <!-- iframes & placeholders injected by JS -->
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-info">
+      <div class="pip-track" id="pip-track"></div>
+      <span class="footer-title" id="footer-title"></span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="footer-counter" id="footer-counter"></span>
+      <div class="nav-arrows">
+        <button class="arrow-btn" id="btn-prev" onclick="navigate(-1)">‹</button>
+        <button class="arrow-btn" id="btn-next" onclick="navigate(1)">›</button>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* ─── CONFIGURA TUS WIDGETS AQUÍ ─────────────────────────────────────────────
+   Cada objeto representa una vista/módulo del curso.
+   - label    : etiqueta corta para el botón de navegación
+   - title    : título largo mostrado en el footer
+   - src      : ruta al archivo HTML del widget (relativa a esta página)
+               Si todavía no tienes el archivo, deja src: null y se mostrará
+               un placeholder.
+   - icon     : emoji para el botón
+──────────────────────────────────────────────────────────────────────────────*/
+const WIDGETS = [
+  {
+    label : 'El Profesor',
+    title : 'Acerca del profesor',
+    icon  : ' ',
+    src   : 'profesor_SDI2.html',
+  },
+  {
+    label : 'El Curso',
+    title : 'Visualización gráfica del curso',
+    icon  : ' ',
+    src   : 'visualizacion_SDI2.html',
+  },
+  {
+    label : 'Trayecto',
+    title : 'Trayecto de actividades',
+    icon  : ' ',
+    src   : 'trayecto_SDI2.html',
+  },
+  {
+    label : 'Encuentros',
+    title : 'Encuentros y entregables',
+    icon  : ' ',
+    src   : 'timeline_SDI2.html',
+  },
+];
+
+/* ─── STATE ──────────────────────────────────────────────────────────────────*/
+let current = 0;
+
+/* ─── BUILD DOM ──────────────────────────────────────────────────────────────*/
+function buildNav() {
+  const nav = document.getElementById('nav-bar');
+  WIDGETS.forEach((w, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'nav-btn' + (i === 0 ? ' active' : '');
+    btn.dataset.idx = i;
+    btn.innerHTML = `<span class="nav-dot"></span>${w.icon} ${w.label}`;
+    btn.onclick = () => goTo(i);
+    nav.appendChild(btn);
+  });
+}
+
+function buildWidgets() {
+  const area = document.getElementById('widget-area');
+  WIDGETS.forEach((w, i) => {
+    if (w.src) {
+      const iframe = document.createElement('iframe');
+      iframe.className = 'widget-frame' + (i === 0 ? ' active' : '');
+      iframe.dataset.idx = i;
+      iframe.src = w.src;
+      iframe.title = w.title;
+      area.appendChild(iframe);
+    } else {
+      const ph = document.createElement('div');
+      ph.className = 'placeholder' + (i === 0 ? ' active' : '');
+      ph.dataset.idx = i;
+      ph.innerHTML = `
+        <div class="placeholder-icon">${w.icon}</div>
+        <div class="placeholder-text">
+          <strong style="color:#666;">${w.label}</strong><br>
+          Asigna el archivo HTML de este módulo<br>en la variable <code style="color:#444;">WIDGETS[${i}].src</code>
+        </div>
+        <div class="placeholder-chip">widget · próximamente</div>`;
+      area.appendChild(ph);
+    }
+  });
+}
+
+function buildPips() {
+  const track = document.getElementById('pip-track');
+  WIDGETS.forEach((_, i) => {
+    const pip = document.createElement('div');
+    pip.className = 'pip' + (i === 0 ? ' active' : '');
+    pip.dataset.idx = i;
+    pip.onclick = () => goTo(i);
+    track.appendChild(pip);
+  });
+}
+
+/* ─── NAVIGATION ─────────────────────────────────────────────────────────────*/
+function goTo(idx) {
+  if (idx === current) return;
+  current = idx;
+  updateUI();
+}
+
+function navigate(dir) {
+  const next = current + dir;
+  if (next < 0 || next >= WIDGETS.length) return;
+  goTo(next);
+}
+
+function updateUI() {
+  const w = WIDGETS[current];
+
+  // nav buttons
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', +b.dataset.idx === current);
+  });
+
+  // frames / placeholders
+  document.querySelectorAll('.widget-frame, .placeholder').forEach(el => {
+    el.classList.toggle('active', +el.dataset.idx === current);
+  });
+
+  // pips
+  document.querySelectorAll('.pip').forEach(p => {
+    p.classList.toggle('active', +p.dataset.idx === current);
+  });
+
+  // footer
+  document.getElementById('footer-title').textContent = w.title;
+  document.getElementById('footer-counter').textContent =
+    `${current + 1} / ${WIDGETS.length}`;
+
+  // arrows
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').disabled = current === WIDGETS.length - 1;
+}
+
+/* ─── INIT ───────────────────────────────────────────────────────────────────*/
+buildNav();
+buildWidgets();
+buildPips();
+updateUI();
+</script>
+</body>
+</html>
